@@ -47,7 +47,6 @@ class NameDayDiscordService(@Value("\${DISCORD_WEBHOOKS}") webhooks: String) {
                     .setFooter(WebhookEmbed.EmbedFooter("${today.dayOfMonth}. ${today.monthValue}.", null))
                     .build()
 
-
                 webhooks.forEach { webhook -> webhook.send(embed) }
             }
     }
