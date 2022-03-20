@@ -13,14 +13,16 @@ import org.springframework.web.reactive.function.client.bodyToMono
 import java.time.LocalDate
 
 @Component
-class NameDayDiscordService(@Value("\${DISCORD_WEBHOOK}") webhook: String) {
+class NameDayDiscordService(@Value("\${DISCORD_WEBHOOKS}") webhooks: String) {
 
-    private val client = WebClient.builder()
+    private val client: WebClient = WebClient.builder()
         .baseUrl("https://svatky.adresa.info")
         .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
         .build()
 
-    private val webhook = WebhookClient.withUrl(webhook)
+    private val webhooks: List<WebhookClient> = webhooks
+        .split(";")
+        .map { WebhookClient.withUrl(it) }
 
     @Scheduled(cron = "0 0 8 * * *")
     fun postNameDayUpdates() {
@@ -45,7 +47,8 @@ class NameDayDiscordService(@Value("\${DISCORD_WEBHOOK}") webhook: String) {
                     .setFooter(WebhookEmbed.EmbedFooter("${today.dayOfMonth}. ${today.monthValue}.", null))
                     .build()
 
-                webhook.send(embed).join()
+
+                webhooks.forEach { webhook -> webhook.send(embed) }
             }
     }
 }
